@@ -15,6 +15,7 @@ import { registerApplicationInBackend } from '../steps/register-application';
 import { scaffoldTerraform } from '../steps/scaffold-terraform';
 import { cleanupRepoArtifacts, transformSeed } from '../steps/transform-seed';
 import { updateTfvars } from '../steps/update-tfvars';
+import { ensureTerraformTfvars } from '../steps/ensure-terraform-tfvars';
 import type {
   ProjectBootstrapContext,
   ProjectBootstrapInput,
@@ -87,8 +88,10 @@ export async function runProjectBootstrap(
       emit('Generar Terraform', 'ok', `locals_${vars.TF_NAME}.tf …`);
 
       emit('Actualizar terraform.tfvars', 'running');
+      const tfvarsPath = join(terraformDir, 'terraform.tfvars');
+      await ensureTerraformTfvars(tfvarsPath);
       await updateTfvars({
-        tfvarsPath: join(terraformDir, 'terraform.tfvars'),
+        tfvarsPath,
         tfName: vars.TF_NAME,
         enabled: true,
       });
