@@ -101,6 +101,18 @@ export async function transformSeed(opts: {
 
   await writeDeployWorkflow(repoDir, type, vars);
 
+  const viteConfigPath = join(repoDir, 'vite.config.ts');
+  try {
+    let viteCfg = await readFile(viteConfigPath, 'utf8');
+    const mfNameRe = /name:\s*['"]boogiepopRemote['"]/;
+    if (mfNameRe.test(viteCfg)) {
+      viteCfg = viteCfg.replace(mfNameRe, `name: '${vars.MF_SCOPE}'`);
+      await writeFile(viteConfigPath, viteCfg, 'utf8');
+    }
+  } catch {
+    /* vite.config opcional */
+  }
+
   if (type === 'next') {
     const dockerTpl = await readFile(
       join(getTemplatesDir(), 'dockerfiles', 'next.Dockerfile.tpl'),
