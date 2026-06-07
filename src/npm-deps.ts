@@ -2,6 +2,7 @@
 export const BOOGIEPOP_NPM_DEPS = {
   'boogiepop-ui': '0.1.0',
   'boogiepop-auth-sdk': '0.1.0',
+  '@boogiepop/auth-sdk': '0.1.0',
 } as const;
 
 export function normalizeBoogiepopNpmDeps(

@@ -7,8 +7,8 @@ function runNpmInstall(cwd: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const isWin = process.platform === 'win32';
     const child = isWin
-      ? spawn('npm.cmd', ['install'], { cwd, stdio: 'inherit', shell: true })
-      : spawn('/bin/sh', ['-c', 'npm install'], { cwd, stdio: 'inherit', env: process.env });
+      ? spawn('npm.cmd', ['install', '--ignore-scripts'], { cwd, stdio: 'inherit', shell: true })
+      : spawn('/bin/sh', ['-c', 'npm install --ignore-scripts'], { cwd, stdio: 'inherit', env: process.env });
     child.on('error', reject);
     child.on('close', (code) => {
       if (code === 0) resolve();
