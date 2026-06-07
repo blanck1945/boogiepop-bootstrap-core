@@ -26,7 +26,7 @@ RUN node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('package.json')
   const d=p.dependencies||{}; \
   delete d['boogiepop-auth-sdk']; \
   delete d['@boogiepop/auth-sdk']; \
-  d['@boogiepop/auth-sdk']='file:../boogiepop-auth-sdk'; \
+  d['boogiepop-auth-sdk']='file:../boogiepop-auth-sdk'; \
   d['boogiepop-ui']='file:../boogiepop-ui'; \
   p.dependencies=d; \
   fs.writeFileSync('package.json',JSON.stringify(p,null,2))" && \

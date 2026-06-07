@@ -117,10 +117,6 @@ export async function transformSeed(opts: {
     const authPath = join(repoDir, 'src', 'components', 'AuthPlaceholder.tsx');
     try {
       let authSrc = await readFile(authPath, 'utf8');
-      authSrc = authSrc.replace(
-        /from ['"]boogiepop-auth-sdk\/react['"]/g,
-        "from '@boogiepop/auth-sdk/react'",
-      );
       if (authSrc.includes('r.name')) {
         authSrc = authSrc.replace(
           /const roleLabel = [^\n]+/,

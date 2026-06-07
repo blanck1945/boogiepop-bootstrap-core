@@ -1,8 +1,7 @@
-/** Versiones publicadas en npm de libs compartidas Boogiepop. */
+/** Versiones publicadas en npm (cuenta virtualsnake9, sin scope @boogiepop). */
 export const BOOGIEPOP_NPM_DEPS = {
   'boogiepop-ui': '0.1.0',
-  'boogiepop-auth-sdk': '0.1.0',
-  '@boogiepop/auth-sdk': '0.1.0',
+  'boogiepop-auth-sdk': '0.1.1',
 } as const;
 
 export function normalizeBoogiepopNpmDeps(
@@ -16,9 +15,9 @@ export function normalizeBoogiepopNpmDeps(
       out[name] = version;
     }
   }
-  if (out['boogiepop-auth-sdk'] && !out['@boogiepop/auth-sdk']) {
-    out['@boogiepop/auth-sdk'] = out['boogiepop-auth-sdk'];
-    delete out['boogiepop-auth-sdk'];
+  if (out['@boogiepop/auth-sdk']) {
+    out['boogiepop-auth-sdk'] = out['@boogiepop/auth-sdk'];
+    delete out['@boogiepop/auth-sdk'];
   }
   return out;
 }
