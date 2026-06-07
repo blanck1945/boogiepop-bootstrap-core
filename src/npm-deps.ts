@@ -16,5 +16,9 @@ export function normalizeBoogiepopNpmDeps(
       out[name] = version;
     }
   }
+  if (out['boogiepop-auth-sdk'] && !out['@boogiepop/auth-sdk']) {
+    out['@boogiepop/auth-sdk'] = out['boogiepop-auth-sdk'];
+    delete out['boogiepop-auth-sdk'];
+  }
   return out;
 }

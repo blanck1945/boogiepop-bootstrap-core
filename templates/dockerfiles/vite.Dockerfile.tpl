@@ -15,6 +15,7 @@ WORKDIR /ui
 COPY boogiepop-ui/package.json boogiepop-ui/package-lock.json* ./
 RUN npm ci 2>/dev/null || npm install
 COPY boogiepop-ui/ .
+RUN npm run build
 
 FROM node:${NODE_VERSION}-alpine AS deps
 WORKDIR /workspace/app
@@ -24,6 +25,7 @@ COPY {{APP_SLUG}}/package.json ./
 RUN node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('package.json')); \
   const d=p.dependencies||{}; \
   delete d['boogiepop-auth-sdk']; \
+  delete d['@boogiepop/auth-sdk']; \
   d['@boogiepop/auth-sdk']='file:../boogiepop-auth-sdk'; \
   d['boogiepop-ui']='file:../boogiepop-ui'; \
   p.dependencies=d; \
