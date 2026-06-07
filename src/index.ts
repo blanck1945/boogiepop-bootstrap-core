@@ -9,6 +9,8 @@ export type { GithubOrgConfig } from './github-orgs';
 export { runProjectBootstrap, runGitHubBootstrap } from './orchestrator/github-only';
 export { listGithubOrgs } from './steps/github';
 export { checkProjectNameAvailability } from './steps/check-project-name';
+export { getGithubDeployStatus } from './steps/wait-github-deploy';
+export type { DeployPollResult, DeployPollStatus } from './steps/wait-github-deploy';
 export {
   registerApplicationInBackend,
   setApplicationHubVisibility,

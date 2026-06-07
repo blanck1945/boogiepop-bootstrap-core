@@ -51,6 +51,8 @@ export interface ProjectBootstrapResult {
   deployRunUrl?: string;
   /** HEAD/GET OK en appEmbedUrl o appPublicUrl tras deploy exitoso. */
   liveUrlVerified?: boolean;
+  /** ISO timestamp del push inicial a main (para polling CI desde la CLI). */
+  pushedAt?: string;
 }
 
 /** @deprecated Use ProjectBootstrapResult */
