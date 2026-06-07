@@ -10,6 +10,8 @@ import {
 } from '../steps/github';
 import { cloneSeed, initAndPushRepo } from '../steps/git';
 import { lockProjectDeps } from '../steps/lock-project-deps';
+import { waitForGithubDeploy } from '../steps/wait-github-deploy';
+import { waitForLiveUrl } from '../steps/wait-live-url';
 import { runTerraformApply } from '../steps/terraform-apply';
 import { registerApplicationInBackend } from '../steps/register-application';
 import { scaffoldTerraform } from '../steps/scaffold-terraform';
@@ -52,6 +54,9 @@ export async function runProjectBootstrap(
   let appEmbedUrl: string | undefined;
   let applicationId: string | undefined;
   let applicationHubVisible: boolean | undefined;
+  let deployStatus: 'success' | 'failure' | 'timeout' | undefined;
+  let deployRunUrl: string | undefined;
+  let liveUrlVerified: boolean | undefined;
 
   if (!workDir) {
     workDir = await mkdtemp(join(tmpdir(), 'bp-bootstrap-'));
@@ -177,6 +182,7 @@ export async function runProjectBootstrap(
     }
 
     emit('Push inicial a GitHub', 'running');
+    const pushStartedAt = new Date();
     const authedRemote = buildAuthedHttpsUrl(cloneUrl, token);
     await initAndPushRepo({
       repoDir,
@@ -184,6 +190,45 @@ export async function runProjectBootstrap(
       message: `chore: bootstrap from ${input.type} seed`,
     });
     emit('Push inicial a GitHub', 'ok', 'main');
+
+    if (infraApplied) {
+      emit('Deploy GitHub Actions', 'running', 'esperando workflow en main…');
+      const deploy = await waitForGithubDeploy({
+        owner,
+        repo: repoName,
+        token,
+        startedAfter: pushStartedAt,
+        onProgress: (detail) => emit('Deploy GitHub Actions', 'running', detail),
+      });
+
+      deployRunUrl = deploy.htmlUrl;
+      deployStatus = deploy.status;
+
+      if (deploy.status === 'success') {
+        emit('Deploy GitHub Actions', 'ok', deploy.htmlUrl ?? 'success');
+      } else {
+        const detail =
+          deploy.status === 'timeout'
+            ? 'timeout esperando CI (revisá Actions manualmente)'
+            : `${deploy.conclusion ?? 'failure'}${deploy.htmlUrl ? ` · ${deploy.htmlUrl}` : ''}`;
+        emit('Deploy GitHub Actions', 'warn', detail);
+      }
+
+      const checkUrl = appEmbedUrl ?? appPublicUrl;
+      if (checkUrl && deploy.status === 'success') {
+        emit('Verificar URL en producción', 'running', checkUrl);
+        liveUrlVerified = await waitForLiveUrl(checkUrl);
+        if (liveUrlVerified) {
+          emit('Verificar URL en producción', 'ok', checkUrl);
+        } else {
+          emit(
+            'Verificar URL en producción',
+            'warn',
+            'URL aún no responde (ECS puede estar arrancando)',
+          );
+        }
+      }
+    }
 
     if (ctx.backendApiUrl && ctx.backendAdminEmail && ctx.backendAdminPassword) {
       if (!appPublicUrl && !appEmbedUrl) {
@@ -274,6 +319,9 @@ export async function runProjectBootstrap(
       appEmbedUrl,
       applicationId,
       applicationHubVisible,
+      deployStatus,
+      deployRunUrl,
+      liveUrlVerified,
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

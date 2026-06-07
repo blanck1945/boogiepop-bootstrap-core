@@ -4,7 +4,7 @@ export type ProjectType = 'next' | 'vite' | 'streamlit';
 
 export type GitHubPermission = 'admin' | 'write' | 'read';
 
-export type EmitStatus = 'running' | 'ok' | 'error';
+export type EmitStatus = 'running' | 'ok' | 'error' | 'warn';
 
 export type EmitFn = (step: string, status: EmitStatus, detail?: string) => void;
 
@@ -46,6 +46,11 @@ export interface ProjectBootstrapResult {
   applicationId?: string;
   /** App pública sin workspaces; oculta en manifest del hub. */
   applicationHubVisible?: boolean;
+  /** Resultado del workflow deploy.yml tras push a main. */
+  deployStatus?: 'success' | 'failure' | 'timeout';
+  deployRunUrl?: string;
+  /** HEAD/GET OK en appEmbedUrl o appPublicUrl tras deploy exitoso. */
+  liveUrlVerified?: boolean;
 }
 
 /** @deprecated Use ProjectBootstrapResult */
