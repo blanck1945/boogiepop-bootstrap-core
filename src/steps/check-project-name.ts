@@ -42,11 +42,14 @@ export async function checkProjectNameAvailability(opts: {
 
   const octokit = new Octokit({ auth: token });
   try {
-    await octokit.repos.get({ owner: githubOrg, repo: repoName });
-    conflicts.push({
-      kind: 'github_repo',
-      message: `El repo github.com/${githubOrg}/${repoName} ya existe`,
-    });
+    const { data } = await octokit.repos.get({ owner: githubOrg, repo: repoName });
+    // GitHub redirige nombres renombrados; solo bloquear si el repo activo usa ese nombre.
+    if (data.name === repoName) {
+      conflicts.push({
+        kind: 'github_repo',
+        message: `El repo github.com/${githubOrg}/${repoName} ya existe`,
+      });
+    }
   } catch (err: unknown) {
     const status = (err as { status?: number }).status;
     if (status !== 404) {
