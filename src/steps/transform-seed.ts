@@ -113,6 +113,32 @@ export async function transformSeed(opts: {
     /* vite.config opcional */
   }
 
+  if (type === 'vite') {
+    const authPath = join(repoDir, 'src', 'components', 'AuthPlaceholder.tsx');
+    try {
+      let authSrc = await readFile(authPath, 'utf8');
+      const brokenRoles = /snapshot\.roles\.map\(\(r\) => r\.name\)/;
+      if (brokenRoles.test(authSrc)) {
+        authSrc = authSrc.replace(
+          brokenRoles,
+          'snapshot.roles.join',
+        ).replace(
+          /\.join\(\(r\) => r\.name\)\.join\(', '\)/,
+          ".join(', ')",
+        );
+        if (authSrc.includes('r.name')) {
+          authSrc = authSrc.replace(
+            /const roleLabel = snapshot\.roles\.length > 0 \? snapshot\.roles\.map\(\(r\) => r\.name\)\.join\(', '\) : 'sin roles'/,
+            "const roleLabel = snapshot.roles.length > 0 ? snapshot.roles.join(', ') : 'sin roles'",
+          );
+        }
+        await writeFile(authPath, authSrc, 'utf8');
+      }
+    } catch {
+      /* AuthPlaceholder opcional */
+    }
+  }
+
   if (type === 'next') {
     const dockerTpl = await readFile(
       join(getTemplatesDir(), 'dockerfiles', 'next.Dockerfile.tpl'),
