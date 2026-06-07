@@ -61,6 +61,7 @@ jobs:
           platforms: linux/arm64
           build-args: |
             VITE_REMOTE_BASE=/{{HTTP_PATH}}/
+            NGINX_BASE_PATH={{HTTP_PATH}}
             VITE_DEV_SERVER_ORIGIN=http://localhost:5173
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}

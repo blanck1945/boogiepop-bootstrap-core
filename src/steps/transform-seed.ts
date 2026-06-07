@@ -118,7 +118,15 @@ export async function transformSeed(opts: {
       join(getTemplatesDir(), 'dockerfiles', 'next.Dockerfile.tpl'),
       'utf8',
     );
-    await writeFile(join(repoDir, 'Dockerfile'), dockerTpl, 'utf8');
+    await writeFile(join(repoDir, 'Dockerfile'), render(dockerTpl, scaffoldVarsToRecord(vars)), 'utf8');
+  }
+
+  if (type === 'vite') {
+    const dockerTpl = await readFile(
+      join(getTemplatesDir(), 'dockerfiles', 'vite.Dockerfile.tpl'),
+      'utf8',
+    );
+    await writeFile(join(repoDir, 'Dockerfile'), render(dockerTpl, scaffoldVarsToRecord(vars)), 'utf8');
   }
 
   const pkgPath = join(repoDir, 'package.json');
