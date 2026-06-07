@@ -5,11 +5,10 @@ import type { ProjectType } from '../types';
 
 function runNpmInstall(cwd: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn('npm', ['install'], {
-      cwd,
-      stdio: 'inherit',
-      shell: true,
-    });
+    const isWin = process.platform === 'win32';
+    const child = isWin
+      ? spawn('npm.cmd', ['install'], { cwd, stdio: 'inherit', shell: true })
+      : spawn('/bin/sh', ['-c', 'npm install'], { cwd, stdio: 'inherit', env: process.env });
     child.on('error', reject);
     child.on('close', (code) => {
       if (code === 0) resolve();
