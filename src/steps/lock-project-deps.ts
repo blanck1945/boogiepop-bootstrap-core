@@ -8,7 +8,7 @@ function runNpmInstall(cwd: string): Promise<void> {
     const child = spawn('npm', ['install'], {
       cwd,
       stdio: 'inherit',
-      shell: process.platform === 'win32',
+      shell: true,
     });
     child.on('error', reject);
     child.on('close', (code) => {
