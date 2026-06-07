@@ -127,6 +127,12 @@ export async function transformSeed(opts: {
       'utf8',
     );
     await writeFile(join(repoDir, 'Dockerfile'), render(dockerTpl, scaffoldVarsToRecord(vars)), 'utf8');
+
+    const nginxTpl = await readFile(
+      join(getTemplatesDir(), 'nginx', 'vite.nginx.conf.tpl'),
+      'utf8',
+    );
+    await writeFile(join(repoDir, 'nginx.conf'), nginxTpl, 'utf8');
   }
 
   const pkgPath = join(repoDir, 'package.json');
