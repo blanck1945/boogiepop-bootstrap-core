@@ -8,7 +8,7 @@ import {
   createGithubRepo,
   resolveGithubUsername,
 } from '../steps/github';
-import { cloneSeed, initAndPushRepo } from '../steps/git';
+import { cloneSeed, commitAndPushExistingRepo, initAndPushRepo } from '../steps/git';
 import { lockProjectDeps } from '../steps/lock-project-deps';
 import { runTerraformApply } from '../steps/terraform-apply';
 import { registerApplicationInBackend } from '../steps/register-application';
@@ -97,6 +97,22 @@ export async function runProjectBootstrap(
         enabled: true,
       });
       emit('Actualizar terraform.tfvars', 'ok', `enable_${vars.TF_NAME}_ecs = true`);
+
+      // Commiteamos y pusheamos el scaffold ANTES del apply: si el apply falla
+      // después, queda config-en-git-sin-infra-aplicada (estado seguro y
+      // recuperable con un reintento), no infra-aplicada-sin-config (drift
+      // silencioso e irreversible — el bug que dejó a sql-validator huérfano
+      // de Terraform).
+      emit('Commitear scaffold a boogiepop-infra', 'running');
+      const committed = await commitAndPushExistingRepo({
+        repoDir: terraformDir,
+        message: `feat(terraform): scaffold infra para ${vars.TF_NAME} (${input.type})`,
+      });
+      emit(
+        'Commitear scaffold a boogiepop-infra',
+        'ok',
+        committed ? `${vars.TF_NAME} → main` : 'sin cambios para commitear',
+      );
 
       emit('Terraform apply', 'running', 'puede tardar varios minutos');
       await runTerraformApply({
