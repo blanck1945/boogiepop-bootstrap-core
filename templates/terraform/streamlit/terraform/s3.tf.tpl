@@ -34,3 +34,20 @@ resource "aws_s3_bucket_public_access_block" "{{TF_NAME}}" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# Permite que el browser suba/baje archivos directo a S3 vía URLs presignadas
+# emitidas por el API central (módulo storage). El límite de seguridad es la
+# firma + expiración de la URL presignada (y el scoping IAM), no el origen —
+# por eso "*" es seguro acá: sin una presigned URL válida, S3 igual rechaza.
+resource "aws_s3_bucket_cors_configuration" "{{TF_NAME}}" {
+  count  = local.{{TF_NAME}}_ecs_ready ? 1 : 0
+  bucket = aws_s3_bucket.{{TF_NAME}}[0].id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "HEAD"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 300
+  }
+}
