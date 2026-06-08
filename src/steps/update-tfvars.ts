@@ -13,14 +13,16 @@ export async function updateTfvars(opts: {
 
   let content = await readFile(tfvarsPath, 'utf8');
 
-  const enableRe = new RegExp(`^${enableKey}\\s*=\\s*.*$`, 'm');
+  const enableRe = new RegExp(String.raw`^${enableKey}\s*=\s*.*$`, 'm');
   if (enableRe.test(content)) {
     content = content.replace(enableRe, enableLine);
   } else {
     content = `${content.trimEnd()}\n${enableLine}\n`;
   }
 
-  const envRe = new RegExp(`^${envKey}\\s*=\\s*.*$`, 'm');
+  // Usa String.raw para evitar doble-escape en la construcción dinámica.
+  // Matchea el bloque completo {...} (multilínea) o una línea simple.
+  const envRe = new RegExp(String.raw`^${envKey}\s*=\s*(?:\{[^{}]*\}|[^\n]*)`, 'm');
   if (envRe.test(content)) {
     content = content.replace(envRe, envLine);
   } else {
