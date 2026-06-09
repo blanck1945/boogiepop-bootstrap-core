@@ -34,6 +34,7 @@ export type {
   ProjectNameConflictKind,
 } from './steps/check-project-name';
 export { SEED_REPOS } from './seed-urls';
+export { mergeAppEnvVars, readAppEnvVars, runTerraformApplySecret } from './steps/set-app-env';
 export type {
   ProjectBootstrapInput,
   ProjectBootstrapResult,
